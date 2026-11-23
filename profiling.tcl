@@ -310,7 +310,7 @@ namespace eval ::profiling {
 		set f [open $filename w]
 
 		try {
-			puts $f [list {*}[dict keys $traced]]
+			puts $f [join [dict keys $traced] "\n"]
 		} finally {
 			close $f
 		}
