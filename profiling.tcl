@@ -1,7 +1,7 @@
 package require Tcl 8.6
 
 namespace eval ::profiling {
-	namespace export instrument clear instrumentNamespace instrumentAll clearAll
+	namespace export instrument clear instrumentNamespace instrumentAll clearAll leaveAll
 
 	variable traced {}
 

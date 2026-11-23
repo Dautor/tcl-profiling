@@ -51,11 +51,7 @@ leave(ClientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 		Tcl_WrongNumArgs(interp, 1, objv, "name command code result operation");
 		return TCL_ERROR;
 	}
-	if(ctx_stack_at == 0)
-	{
-		Tcl_SetResult(interp, "Tracy zone stack is empty", TCL_STATIC);
-		return TCL_ERROR;
-	}
+	if(ctx_stack_at == 0) return TCL_OK;
 	--ctx_stack_at;
 	if(ctx_stack_at >= 8192)
 	{
@@ -83,6 +79,23 @@ leave(ClientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	return TCL_OK;
 }
 
+static int
+leave_all(ClientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+	if(objc != 1)
+	{
+		Tcl_WrongNumArgs(interp, 1, objv, "");
+		return TCL_ERROR;
+	}
+	while(ctx_stack_at > 0)
+	{
+		--ctx_stack_at;
+		if(ctx_stack_at >= 8192) continue;
+		___tracy_emit_zone_end(ctx_stack[ctx_stack_at]);
+	}
+	return TCL_OK;
+}
+
 int
 Profiling_Init(Tcl_Interp *interp)
 {
@@ -90,5 +103,6 @@ Profiling_Init(Tcl_Interp *interp)
 	if(Tcl_CreateNamespace(interp, "::profiling", NULL, NULL) == NULL) return TCL_ERROR;
 	Tcl_CreateObjCommand(interp, "::profiling::enter", enter, NULL, NULL);
 	Tcl_CreateObjCommand(interp, "::profiling::leave", leave, NULL, NULL);
+	Tcl_CreateObjCommand(interp, "::profiling::leaveAll", leave_all, NULL, NULL);
 	return 0;
 }
